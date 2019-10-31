@@ -2,9 +2,10 @@
   "name": "fast-srp-hap",
   "description": "Secure Remote Password (SRP)",
   "version": "1.0.1",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "vows test/test_*.js --spec"
+    "prepare": "tsc",
+    "test": "vows dist/test/test_*.js --spec"
   },
   "repository": {
     "type": "git",
@@ -12,9 +13,14 @@
   },
   "author": "Zarmack Tanen",
   "licence": "MIT",
-  "readmeFilename": "README.md",
+  "files": [
+    "lib",
+    "dist"
+  ],
   "dependencies": {},
   "devDependencies": {
-    "vows": "0.7.0"
+    "@types/node": "^12.12.3",
+    "typescript": "^3.6.4",
+    "vows": "^0.8.3"
   }
 }
