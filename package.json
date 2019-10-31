@@ -4,7 +4,7 @@
   "version": "1.0.1",
   "main": "dist/index.js",
   "scripts": {
-    "prepare": "tsc",
+    "prepare": "rm -rf dist && tsc",
     "test": "vows dist/test/test_*.js --spec"
   },
   "repository": {
@@ -15,7 +15,8 @@
   "licence": "MIT",
   "files": [
     "lib",
-    "dist"
+    "dist/index.*",
+    "dist/lib"
   ],
   "dependencies": {},
   "devDependencies": {
