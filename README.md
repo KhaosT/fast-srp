@@ -1,43 +1,64 @@
-# fast-srp
+fast-srp
+===
 
 Is a pure [NodeJS](https://nodejs.org/) implementation of the [SRP6a protocol](http://srp.stanford.edu/).
 
 It's a derived work of [Jed Parson](http://jedparsons.com/)'s [node-srp](https://github.com/jedp/node-srp) and [Tom Wu](http://www-cs-students.stanford.edu/~tjw/)'s [jsbn](http://www-cs-students.stanford.edu/~tjw/jsbn/).
 
+Creating the Verifier
+---
 
-
-
-
-## Creating the Verifier
-```javascript
-'use strict';
-
-var srp6a = require('fast-srp');
+```ts
+import * as srp6a from 'fast-srp-hap';
 
 /**
  * Computes the verifier of a user. Only needed to add the user to the auth system.
  *
- * I: (string)		Username to compute verifier
- * P: (string)		Password
- * callback: (function) Callback function with two params; error, verifier
- *
- * returns: verifier (Buffer)
- *
+ * @param {string} I Username to compute verifier
+ * @param {string} P Password
+ * @return {Promise<{salt: Buffer, verifier: Buffer}>}
  */
-
-var srp6a_create_user = function(I, P, callback) {
-  srp6a.genKey(32, function(error, salt) {
-	  if(error) {
-	    callback(error);
-	  }
-	  var v = srp6a.computeVerifier(srp6a.params[4096], salt, new Buffer(I), new Buffer(P));
-	  callback(null, v);
-  });
+async function srp6a_create_user(I: string, P: string) {
+  const salt = await srp6a.genKey(32);
+  
+  return {
+    // The salt is required for authenticating the user later
+    salt,
+    verifier: srp6a.computeVerifier(srp6a.params[4096], salt, Buffer.from(I), Buffer.from(P)),
+  };
 }
 
-srp6a_create_user('Zarmack Tanen', '*****', function(error, verifier) {
-  if(error)
-    throw error;
-  console.log("SRP6a verifier of Zarmack Tanen user is " + verifier.toString('hex'));
+await srp6a_create_user('Zarmack Tanen', '*****').then(({salt, verifier}) => {
+  console.log('SRP6a verifier and salt of Zarmack Tanen user is %s and %s',
+    verifier.toString('hex'), salt.toString('hex'));
 });
+```
+
+Server
+---
+
+```ts
+import {Server, genKey, params} from 'fast-srp-hap';
+
+(async () => {
+  // Get the user details from somewhere
+  const user = {
+    username: 'username', // Or a Buffer
+
+    // If we have the plaintext password
+    salt: await genKey(32),
+    password: 'password', // Or a Buffer
+    
+    // If we have a saved verifier
+    salt: Buffer.from('...'),
+    verifier: Buffer.from('...'),
+  };
+
+  // Generate a secret key
+  const secret = await genKey(32);
+
+  const server = new Server(params[3076], user, secret); // For Apple SRP use params.hap
+
+  // ...
+})();
 ```
