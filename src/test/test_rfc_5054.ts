@@ -64,7 +64,7 @@ vows.describe('RFC 5054').addBatch({
     },
 
     'x'() {
-      const client = new srp.Client(params, s, I, P, a);
+      const client = new srp.Client(params, s, I, P, a, false);
       // @ts-ignore
       assert.equal(asHex(client._x), x_expected);
     },
@@ -74,13 +74,13 @@ vows.describe('RFC 5054').addBatch({
     },
 
     'k'() {
-      const client = new srp.Client(params, s, I, P, a);
+      const client = new srp.Client(params, s, I, P, a, false);
       // @ts-ignore
       assert.equal(asHex(client._k), k_expected);
     },
 
     'A'() {
-      const client = new srp.Client(params, s, I, P, a);
+      const client = new srp.Client(params, s, I, P, a, false);
       assert.equal(client.computeA().toString('hex'), A_expected);
     },
 
@@ -90,14 +90,14 @@ vows.describe('RFC 5054').addBatch({
     },
 
     'u'() {
-      const client = new srp.Client(params, s, I, P, a);
+      const client = new srp.Client(params, s, I, P, a, false);
       client.setB(Buffer.from(B_expected, 'hex'));
       // @ts-ignore
       assert.equal(asHex(client._u), u_expected);
     },
 
     'S client'() {
-      const client = new srp.Client(params, s, I, P, a);
+      const client = new srp.Client(params, s, I, P, a, false);
       client.setB(Buffer.from(B_expected, 'hex'));
       // @ts-ignore
       assert.equal(client._S.toString('hex'), S_expected);

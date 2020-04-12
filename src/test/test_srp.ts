@@ -33,7 +33,7 @@ vows.describe('srp.js').addBatch({
     })()},
 
     'use a and b'() {
-      client = new srp.Client(params, salt, identity, password, a);
+      client = new srp.Client(params, salt, identity, password, a, false);
 
       // client produces A
       A = client.computeA();
@@ -70,7 +70,7 @@ vows.describe('srp.js').addBatch({
     },
 
     'server rejects wrong M1'() {
-      const bad_client = new srp.Client(params, salt, identity, Buffer.from('bad'), a);
+      const bad_client = new srp.Client(params, salt, identity, Buffer.from('bad'), a, false);
       const server2 = new srp.Server(params, verifier, b);
       bad_client.setB(server2.computeB());
       assert.throws(() => server.checkM1(bad_client.computeM1()), /client did not use the same password/);
@@ -95,7 +95,7 @@ vows.describe('srp.js').addBatch({
 
     'client rejects bad B'() {
       // server's "B" must be 1..N-1 . Reject 0 and N and N+1
-      var client2 = new srp.Client(params, salt, identity, password, a);
+      var client2 = new srp.Client(params, salt, identity, password, a, false);
       var Bzero = Buffer.alloc(params.N_length_bits / 8);
       Bzero.fill(0, 0, params.N_length_bits / 8);
 //!      var BN = params.N.toBuffer();
@@ -108,7 +108,7 @@ vows.describe('srp.js').addBatch({
     },
 
     'client rejects bad M2'() {
-      client = new srp.Client(params, salt, identity, password, a);
+      client = new srp.Client(params, salt, identity, password, a, false);
 
       // client produces A
       A = client.computeA();

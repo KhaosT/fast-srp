@@ -35,7 +35,7 @@ function padTo(n: Buffer, len: number) {
 function padToN(number: BigInteger, params: SrpParams) {
   assertIsBigInteger(number);
   var n = number.toString(16).length % 2 != 0 ? '0' + number.toString(16) : number.toString(16);
-  return padTo(new Buffer(n, 'hex'), params.N_length_bits / 8);
+  return padTo(Buffer.from(n, 'hex'), params.N_length_bits / 8);
 }
 
 function assertIsBuffer(arg: Buffer, argname: string, ___?: any) {
@@ -94,7 +94,7 @@ export function computeVerifier(params: SrpParams, salt: Buffer, I: Buffer, P: B
   assertIsBuffer(I, 'identity (I)');
   assertIsBuffer(P, 'password (P)');
   var v_num = params.g.modPow(getx(params, salt, I, P), params.N);
-  return v_num.toBuffer(true);
+  return v_num.toBuffer(params.N_length_bits / 8);
 }
 
 /**
@@ -157,7 +157,7 @@ function getB(params: SrpParams, k: BigInteger, v: BigInteger, b: BigInteger) {
   assertIsBigInteger(k);
   assertIsBigInteger(b);
   const r = k.multiply(v).add(params.g.modPow(b, params.N)).mod(params.N);
-  return r.toBuffer(true);
+  return r.toBuffer(params.N_length_bits / 8);
 }
 
 /**
@@ -176,7 +176,7 @@ function getA(params: SrpParams, a_num: BigInteger) {
   if (Math.ceil(a_num.toString(16).length / 2) < 32) {
     console.warn('getA: client key length %d is less than the recommended 256 bits', a_num.bitLength());
   }
-  return params.g.modPow(a_num, params.N).toBuffer(true);
+  return params.g.modPow(a_num, params.N).toBuffer(params.N_length_bits / 8);
 }
 
 /**
@@ -218,13 +218,13 @@ function client_getS(params: SrpParams, k_num: BigInteger, x_num: BigInteger, a_
   assertIsBigInteger(a_num);
   assertIsBigInteger(B_num);
   assertIsBigInteger(u_num);
-  if ((zero.compareTo(B_num) < 0) && (params.N.compareTo(B_num) > 0))
+  if ((zero.compareTo(B_num) >= 0) || (params.N.compareTo(B_num) <= 0))
     throw new Error('invalid server-supplied "B", must be 1..N-1');
 
   const S_num = B_num.subtract(k_num.multiply(params.g.modPow(x_num, params.N)))
     .modPow(a_num.add(u_num.multiply(x_num)), params.N)
     .mod(params.N);
-  return S_num.toBuffer(true);
+  return S_num.toBuffer(params.N_length_bits / 8);
 }
 
 /**
@@ -242,13 +242,13 @@ function server_getS(params: SrpParams, v_num: BigInteger, A_num: BigInteger, b_
   assertIsBigInteger(A_num);
   assertIsBigInteger(b_num);
   assertIsBigInteger(u_num);
-  if ((zero.compareTo(A_num) < 0) && (params.N.compareTo(A_num) > 0))
+  if ((zero.compareTo(A_num) >= 0) || (params.N.compareTo(A_num) <= 0))
     throw new Error('invalid client-supplied "A", must be 1..N-1');
 
   const S_num = A_num.multiply(v_num.modPow(u_num, params.N))
     .modPow(b_num, params.N)
     .mod(params.N);
-  return S_num.toBuffer(true);
+  return S_num.toBuffer(params.N_length_bits / 8);
 }
 
 /**
@@ -342,9 +342,9 @@ export class Client {
   private _A: Buffer;
 
   /** User identity */
-  private _I: Buffer;
+  private _I?: Buffer;
   /** User salt */
-  private _s: Buffer;
+  private _s?: Buffer;
 
   /** Session key */
   private _K?: Buffer;
@@ -368,7 +368,7 @@ export class Client {
    * @param {Buffer} password_buf Password
    * @param {Buffer} secret1_buf Client private key {@see genKey}
    */
-  constructor(params: SrpParams, salt_buf: Buffer, identity_buf: Buffer, password_buf: Buffer, secret1_buf: Buffer) {
+  constructor(params: SrpParams, salt_buf: Buffer, identity_buf: Buffer, password_buf: Buffer, secret1_buf: Buffer, hap = true) {
     assertIsBuffer(salt_buf, 'salt (s)');
     assertIsBuffer(identity_buf, 'identity (I)');
     assertIsBuffer(password_buf, 'password (P)');
@@ -379,8 +379,10 @@ export class Client {
     this._x = getx(params, salt_buf, identity_buf, password_buf);
     this._a = new BigInteger(secret1_buf);
 
-    this._I = identity_buf;
-    this._s = salt_buf;
+    if (hap) {
+      this._I = identity_buf;
+      this._s = salt_buf;
+    }
 
     this._A = getA(params, this._a);
   }
@@ -407,7 +409,11 @@ export class Client {
     this._u = u_num; // only for tests
     this._S = S_buf_x; // only for tests
     this._B = B_buf;
-    this._M1 = getM1(this._params, this._I, this._s, this._A, this._B, this._K);
+    if (this._I && this._s) {
+      this._M1 = getM1(this._params, this._I, this._s, this._A, this._B, this._K);
+    } else {
+      this._M1 = getM1(this._params, this._A, this._B, this._S);
+    }
     this._M2 = getM2(this._params, this._A, this._M1!, this._K);
   }
 
@@ -572,15 +578,15 @@ export class Server {
     const S_buf = server_getS(this._params, this._v, new BigInteger(A), this._b, u_num);
 
     this._K = getK(this._params, S_buf);
+    this._u = u_num; // only for tests
+    this._S = S_buf; // only for tests
+
     if (this._I && this._s) {
       this._M1 = getM1(this._params, this._I, this._s, A, this._B, this._K);
     } else {
-      this._M1 = getM1(this._params, A, this._B, this._K);
+      this._M1 = getM1(this._params, A, this._B, this._S);
     }
     this._M2 = getM2(this._params, A, this._M1, this._K);
-
-    this._u = u_num; // only for tests
-    this._S = S_buf; // only for tests
   }
 
   /**

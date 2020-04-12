@@ -319,10 +319,10 @@ function numequal(a: BigInteger, b: BigInteger, msg?: string) {
 }
 
 function checkVectors(params: srp.SrpParams, inputs: Input, expected: ExpectedOutput) {
-  hexequal(inputs.I, new Buffer('616e6472c3a9406578616d706c652e6f7267', 'hex'), 'I');
+  hexequal(inputs.I, Buffer.from('616e6472c3a9406578616d706c652e6f7267', 'hex'), 'I');
   hexequal(srp.computeVerifier(params, inputs.salt, inputs.I, inputs.P), expected.v, 'v');
 
-  const client = new srp.Client(params, inputs.salt, inputs.I, inputs.P, inputs.a);
+  const client = new srp.Client(params, inputs.salt, inputs.I, inputs.P, inputs.a, false);
   const server = new srp.Server(params, expected.v, inputs.b);
 
   // @ts-ignore

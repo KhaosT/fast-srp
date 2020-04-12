@@ -6,7 +6,8 @@ declare class BigInteger {
     toString(base?: number): string;
     toBuffer(trimOrSize?: true | number): Buffer;
 
-    compareTo(a: BigInteger): number;
+    /** @return {number} 1 if this > a, -1 if this < a, 0 if equal */
+    compareTo(a: BigInteger): -1 | 0 | 1;
     
     multiply(b: BigInteger): BigInteger;
     
