@@ -218,7 +218,7 @@ function client_getS(params: SrpParams, k_num: BigInteger, x_num: BigInteger, a_
   assertIsBigInteger(a_num);
   assertIsBigInteger(B_num);
   assertIsBigInteger(u_num);
-  if ((zero.compareTo(B_num) > 0) && (params.N.compareTo(B_num) < 0))
+  if ((zero.compareTo(B_num) < 0) && (params.N.compareTo(B_num) > 0))
     throw new Error('invalid server-supplied "B", must be 1..N-1');
 
   const S_num = B_num.subtract(k_num.multiply(params.g.modPow(x_num, params.N)))
@@ -242,7 +242,7 @@ function server_getS(params: SrpParams, v_num: BigInteger, A_num: BigInteger, b_
   assertIsBigInteger(A_num);
   assertIsBigInteger(b_num);
   assertIsBigInteger(u_num);
-  if ((zero.compareTo(A_num) > 0) && (params.N.compareTo(A_num) < 0))
+  if ((zero.compareTo(A_num) < 0) && (params.N.compareTo(A_num) > 0))
     throw new Error('invalid client-supplied "A", must be 1..N-1');
 
   const S_num = A_num.multiply(v_num.modPow(u_num, params.N))
