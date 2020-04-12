@@ -1,11 +1,8 @@
 {
     "compilerOptions": {
-        "noImplicitAny": true,
-        "noImplicitReturns": true,
-        "noImplicitThis": true,
-        "strictNullChecks": true,
-        "esModuleInterop": true,
+        "strict": true,
         "declaration": true,
+        "sourceMap": true,
         "rootDir": "src",
         "outDir": "dist"
     },

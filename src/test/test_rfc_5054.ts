@@ -1,8 +1,10 @@
 // @ts-ignore
-import vows from 'vows';
-import assert from 'assert';
+import * as vows from 'vows';
+import * as assert from 'assert';
 import * as srp from '..';
-import BigInteger from '../../lib/jsbn';
+import BigInteger = require('../../lib/jsbn');
+
+delete exports.__esModule;
 
 const params = srp.params[1024];
 

@@ -1,6 +1,6 @@
-import crypto from 'crypto';
-import assert from 'assert';
-import BigInteger from '../../lib/jsbn';
+import * as crypto from 'crypto';
+import * as assert from 'assert';
+import BigInteger = require('../../lib/jsbn');
 
 import {SrpParams} from './params';
 

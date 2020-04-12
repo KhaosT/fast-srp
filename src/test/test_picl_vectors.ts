@@ -1,8 +1,10 @@
 // @ts-ignore
-import vows from 'vows';
-import assert from 'assert';
+import * as vows from 'vows';
+import * as assert from 'assert';
 import * as srp from '..';
-import BigInteger from '../../lib/jsbn';
+import BigInteger = require('../../lib/jsbn');
+
+delete exports.__esModule;
 
 /*
  * Vectors from https://wiki.mozilla.org/Identity/AttachedServices/KeyServerProtocol

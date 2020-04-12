@@ -14,7 +14,7 @@
 // since these are meant to be used internally, all values are numbers. If
 // you want to add parameter sets, you'll need to convert them to bignums.
 
-import BigInteger from '../../lib/jsbn';
+import BigInteger = require('../../lib/jsbn');
 
 export function hex(s: string) {
     return new BigInteger(s.split(/\s|\n/).join(''), 16);

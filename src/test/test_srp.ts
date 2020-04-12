@@ -1,13 +1,15 @@
 // @ts-ignore
-import vows from 'vows';
-import assert from 'assert';
+import * as vows from 'vows';
+import * as assert from 'assert';
 import * as srp from '..';
+
+delete exports.__esModule;
 
 const params = srp.params[4096];
 
-const salt = new Buffer('salty');
-const identity = new Buffer('alice');
-const password = new Buffer('password123');
+const salt = Buffer.from('salty');
+const identity = Buffer.from('alice');
+const password = Buffer.from('password123');
 
 assert(params, 'missing parameters');
 
@@ -86,9 +88,9 @@ vows.describe('srp.js').addBatch({
 //!      var AN1 = params.N.add(1).toBuffer();
       var AN = Buffer.from(params.N.toString(16), 'hex');
       var AN1 = Buffer.from(params.N.add(1).toString(16), 'hex');
-      assert.throws(() => server2.setA(Azero), /invalid client-supplied 'A'/);
-      assert.throws(() => server2.setA(AN), /invalid client-supplied 'A'/);
-      assert.throws(() => server2.setA(AN1), /invalid client-supplied 'A'/);
+      assert.throws(() => server2.setA(Azero), /invalid client-supplied "A"/);
+      assert.throws(() => server2.setA(AN), /invalid client-supplied "A"/);
+      assert.throws(() => server2.setA(AN1), /invalid client-supplied "A"/);
     },
 
     'client rejects bad B'() {
@@ -100,9 +102,9 @@ vows.describe('srp.js').addBatch({
 //!      var BN1 = params.N.add(1).toBuffer();
       var BN = Buffer.from(params.N.toString(16), 'hex');
       var BN1 = Buffer.from(params.N.add(1).toString(16), 'hex');
-      assert.throws(() => client2.setB(Bzero), /invalid server-supplied 'B'/);
-      assert.throws(() => client2.setB(BN), /invalid server-supplied 'B'/);
-      assert.throws(() => client2.setB(BN1), /invalid server-supplied 'B'/);
+      assert.throws(() => client2.setB(Bzero), /invalid server-supplied "B"/);
+      assert.throws(() => client2.setB(BN), /invalid server-supplied "B"/);
+      assert.throws(() => client2.setB(BN1), /invalid server-supplied "B"/);
     },
 
     'client rejects bad M2'() {
