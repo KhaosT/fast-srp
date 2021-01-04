@@ -17,8 +17,8 @@ function assertIsBuffer(arg: Buffer, argname = "arg"): void {
   assert_(Buffer.isBuffer(arg), `Type error: ${argname} must be a buffer`);
 }
 
-function assertIsBigInteger(arg: BigInteger, argname?: string): void {
-  assert_(arg.constructor.name === "BigInteger", `Type error: ${argname} must be a BigInteger`);
+function assertIsBigInteger(arg: BigInteger, argname = "arg"): void {
+  assert_(arg instanceof BigInteger, `Type error: ${argname} must be a BigInteger`);
 }
 
 /**
